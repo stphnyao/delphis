@@ -1,51 +1,75 @@
-import Head from 'next/head'
+import Head from "next/head"
+import React, { useEffect, useState } from "react"
+// import twitterLogo from "./assets/twitter-logo.svg"
 
-export default function Home() {
+const Home = () => {
+  const [walletAddress, setWalletAddress] = useState(null)
+const checkIfWalletIsConnected = async () => {
+  try {
+    const { solana } = window
+
+    if (solana) {
+      if (solana.isPhantom) {
+        console.log("Phantom wallet found!")
+        const response = await solana.connect({ onlyIfTrusted: true })
+        console.log("Connected with Public Key:", response.publicKey.toString())
+
+        /*
+         * Set the user's publicKey in state to be used later!
+         */
+        setWalletAddress(response.publicKey.toString())
+      }
+    } else {
+      alert("Solana object not found! Get a Phantom Wallet 👻")
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+  const connectWallet = async () => {
+    const { solana } = window
+
+    if (solana) {
+      const response = await solana.connect()
+      console.log("Connected with Public Key:", response.publicKey.toString())
+      setWalletAddress(response.publicKey.toString())
+    }
+  }
+
+  const renderNotConnectedContainer = () => (
+    <button
+      className="cta-button connect-wallet-button"
+      onClick={connectWallet}
+    >
+      Connect to Wallet
+    </button>
+  )
+
+  useEffect(() => {
+    const onLoad = async () => {
+      await checkIfWalletIsConnected()
+    }
+    window.addEventListener("load", onLoad)
+    return () => window.removeEventListener("load", onLoad)
+  }, [])
+
   return (
     <div className="container">
       <Head>
-        <title>Create Next App</title>
+        <title>Delphis</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main>
         <h1 className="title">
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
+          Welcome to <a href="/">Delphis</a>
         </h1>
 
         <p className="description">
-          Get started by editing <code>pages/index.js</code>
+          Get started by connecting your Solana Wallet!
         </p>
-
-        <div className="grid">
-          <a href="https://nextjs.org/docs" className="card">
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className="card">
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className="card"
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className="card"
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
+        {!walletAddress && renderNotConnectedContainer()}
       </main>
 
       <footer>
@@ -54,8 +78,7 @@ export default function Home() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel" className="logo" />
+          Powered by <img src="/vercel.svg" alt="Vercel" className="logo" />
         </a>
       </footer>
 
@@ -188,6 +211,32 @@ export default function Home() {
             flex-direction: column;
           }
         }
+
+        .cta-button {
+          height: 45px;
+          border: 0;
+          width: auto;
+          padding-left: 40px;
+          padding-right: 40px;
+          border-radius: 10px;
+          cursor: pointer;
+          font-size: 16px;
+          font-weight: bold;
+          color: white;
+        }
+
+        .connect-wallet-button {
+          background: -webkit-linear-gradient(left, #60c657, #35aee2);
+          background-size: 200% 200%;
+          animation: gradient-animation 4s ease infinite;
+        }
+
+        .gradient-text {
+          background: -webkit-linear-gradient(left, #60c657 30%, #35aee2 60%);
+          background-clip: text;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
       `}</style>
 
       <style jsx global>{`
@@ -207,3 +256,5 @@ export default function Home() {
     </div>
   )
 }
+
+export default Home

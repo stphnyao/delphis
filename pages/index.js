@@ -1,31 +1,44 @@
 import Head from "next/head"
+import { ChakraProvider, Container, Center, Button } from "@chakra-ui/react"
+import Link from "next/link"
 import React, { useEffect, useState } from "react"
 // import twitterLogo from "./assets/twitter-logo.svg"
 
 const Home = () => {
+  const TEST_GIFS = [
+    "https://i.giphy.com/media/eIG0HfouRQJQr1wBzz/giphy.webp",
+    "https://media3.giphy.com/media/L71a8LW2UrKwPaWNYM/giphy.gif?cid=ecf05e47rr9qizx2msjucl1xyvuu47d7kf25tqt2lvo024uo&rid=giphy.gif&ct=g",
+    "https://media4.giphy.com/media/AeFmQjHMtEySooOc8K/giphy.gif?cid=ecf05e47qdzhdma2y3ugn32lkgi972z9mpfzocjj6z1ro4ec&rid=giphy.gif&ct=g",
+    "https://i.giphy.com/media/PAqjdPkJLDsmBRSYUp/giphy.webp",
+  ]
   const [walletAddress, setWalletAddress] = useState(null)
-const checkIfWalletIsConnected = async () => {
-  try {
-    const { solana } = window
+  const [inputValue, setInputValue] = useState("")
+  const [gifList, setGifList] = useState([])
+  const checkIfWalletIsConnected = async () => {
+    try {
+      const { solana } = window
 
-    if (solana) {
-      if (solana.isPhantom) {
-        console.log("Phantom wallet found!")
-        const response = await solana.connect({ onlyIfTrusted: true })
-        console.log("Connected with Public Key:", response.publicKey.toString())
+      if (solana) {
+        if (solana.isPhantom) {
+          console.log("Phantom wallet found!")
+          const response = await solana.connect({ onlyIfTrusted: true })
+          console.log(
+            "Connected with Public Key:",
+            response.publicKey.toString()
+          )
 
-        /*
-         * Set the user's publicKey in state to be used later!
-         */
-        setWalletAddress(response.publicKey.toString())
+          /*
+           * Set the user's publicKey in state to be used later!
+           */
+          setWalletAddress(response.publicKey.toString())
+        }
+      } else {
+        alert("Solana object not found! Get a Phantom Wallet 👻")
       }
-    } else {
-      alert("Solana object not found! Get a Phantom Wallet 👻")
+    } catch (error) {
+      console.error(error)
     }
-  } catch (error) {
-    console.error(error)
   }
-}
 
   const connectWallet = async () => {
     const { solana } = window
@@ -37,14 +50,54 @@ const checkIfWalletIsConnected = async () => {
     }
   }
 
+  const sendGif = async () => {
+    if (inputValue.length > 0) {
+      console.log("Gif link:", inputValue)
+      setGifList([...gifList, inputValue])
+      setInputValue("")
+    } else {
+      console.log("Empty input. Try again.")
+    }
+  }
+
+  const onInputChange = (event) => {
+    const { value } = event.target
+    setInputValue(value)
+  }
+
   const renderNotConnectedContainer = () => (
-    <button
-      className="cta-button connect-wallet-button"
-      onClick={connectWallet}
-    >
-      Connect to Wallet
-    </button>
+    <Button onClick={connectWallet}>Connect to Wallet</Button>
   )
+
+ const renderConnectedContainer = () => (
+   <div className="connected-container">
+     <form
+       onSubmit={(event) => {
+         event.preventDefault()
+         sendGif()
+       }}
+     >
+       <input
+         type="text"
+         placeholder="Enter gif link!"
+         value={inputValue}
+         onChange={onInputChange}
+       />
+       <button type="submit" className="cta-button submit-gif-button">
+         Submit
+       </button>
+     </form>
+     <div className="gif-grid">
+       {/* Map through gifList instead of TEST_GIFS */}
+       {gifList.map((gif) => (
+         <div className="gif-item" key={gif}>
+           <img src={gif} alt={gif} />
+         </div>
+       ))}
+     </div>
+   </div>
+ )
+
 
   useEffect(() => {
     const onLoad = async () => {
@@ -54,206 +107,52 @@ const checkIfWalletIsConnected = async () => {
     return () => window.removeEventListener("load", onLoad)
   }, [])
 
+  useEffect(() => {
+    if (walletAddress) {
+      console.log("Fetching GIF list...")
+
+      // Call Solana program here.
+
+      // Set state
+      setGifList(TEST_GIFS)
+    }
+  }, [walletAddress])
+
   return (
-    <div className="container">
-      <Head>
-        <title>Delphis</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+    <ChakraProvider>
+      <Container centerContent>
+        <Center>
+          <Head>
+            <title>Delphis</title>
+            <link rel="icon" href="/favicon.ico" />
+          </Head>
 
-      <main>
-        <h1 className="title">
-          Welcome to <a href="/">Delphis</a>
-        </h1>
+          <main>
+            <h1 className="title">
+              Welcome to <a href="/">Delphis</a>
+            </h1>
 
-        <p className="description">
-          Get started by connecting your Solana Wallet!
-        </p>
-        {!walletAddress && renderNotConnectedContainer()}
-      </main>
+            <p className="description">
+              Get started by connecting your Solana Wallet!
+            </p>
+            {!walletAddress && renderNotConnectedContainer()}
+            {walletAddress && renderConnectedContainer()}
+          </main>
 
-      <footer>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by <img src="/vercel.svg" alt="Vercel" className="logo" />
-        </a>
-      </footer>
-
-      <style jsx>{`
-        .container {
-          min-height: 100vh;
-          padding: 0 0.5rem;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-        }
-
-        main {
-          padding: 5rem 0;
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-        }
-
-        footer {
-          width: 100%;
-          height: 100px;
-          border-top: 1px solid #eaeaea;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-
-        footer img {
-          margin-left: 0.5rem;
-        }
-
-        footer a {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-
-        a {
-          color: inherit;
-          text-decoration: none;
-        }
-
-        .title a {
-          color: #0070f3;
-          text-decoration: none;
-        }
-
-        .title a:hover,
-        .title a:focus,
-        .title a:active {
-          text-decoration: underline;
-        }
-
-        .title {
-          margin: 0;
-          line-height: 1.15;
-          font-size: 4rem;
-        }
-
-        .title,
-        .description {
-          text-align: center;
-        }
-
-        .description {
-          line-height: 1.5;
-          font-size: 1.5rem;
-        }
-
-        code {
-          background: #fafafa;
-          border-radius: 5px;
-          padding: 0.75rem;
-          font-size: 1.1rem;
-          font-family: Menlo, Monaco, Lucida Console, Liberation Mono,
-            DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
-        }
-
-        .grid {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-wrap: wrap;
-
-          max-width: 800px;
-          margin-top: 3rem;
-        }
-
-        .card {
-          margin: 1rem;
-          flex-basis: 45%;
-          padding: 1.5rem;
-          text-align: left;
-          color: inherit;
-          text-decoration: none;
-          border: 1px solid #eaeaea;
-          border-radius: 10px;
-          transition: color 0.15s ease, border-color 0.15s ease;
-        }
-
-        .card:hover,
-        .card:focus,
-        .card:active {
-          color: #0070f3;
-          border-color: #0070f3;
-        }
-
-        .card h3 {
-          margin: 0 0 1rem 0;
-          font-size: 1.5rem;
-        }
-
-        .card p {
-          margin: 0;
-          font-size: 1.25rem;
-          line-height: 1.5;
-        }
-
-        .logo {
-          height: 1em;
-        }
-
-        @media (max-width: 600px) {
-          .grid {
-            width: 100%;
-            flex-direction: column;
-          }
-        }
-
-        .cta-button {
-          height: 45px;
-          border: 0;
-          width: auto;
-          padding-left: 40px;
-          padding-right: 40px;
-          border-radius: 10px;
-          cursor: pointer;
-          font-size: 16px;
-          font-weight: bold;
-          color: white;
-        }
-
-        .connect-wallet-button {
-          background: -webkit-linear-gradient(left, #60c657, #35aee2);
-          background-size: 200% 200%;
-          animation: gradient-animation 4s ease infinite;
-        }
-
-        .gradient-text {
-          background: -webkit-linear-gradient(left, #60c657 30%, #35aee2 60%);
-          background-clip: text;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-        }
-      `}</style>
-
-      <style jsx global>{`
-        html,
-        body {
-          padding: 0;
-          margin: 0;
-          font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
-            Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue,
-            sans-serif;
-        }
-
-        * {
-          box-sizing: border-box;
-        }
-      `}</style>
-    </div>
+        </Center>
+      </Container>
+      <Container centerContent>
+        <footer>
+          <a
+            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Powered by <img src="/vercel.svg" alt="Vercel" className="logo" />
+          </a>
+        </footer>
+      </Container>
+    </ChakraProvider>
   )
 }
 

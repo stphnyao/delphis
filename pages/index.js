@@ -1,8 +1,19 @@
 import Head from "next/head"
-import { ChakraProvider, Container, Center, Button } from "@chakra-ui/react"
-import Link from "next/link"
 import React, { useEffect, useState } from "react"
-// import twitterLogo from "./assets/twitter-logo.svg"
+
+import {
+  Box,
+  Center,
+  Heading,
+  Container,
+  Text,
+  Button,
+  Stack,
+  Icon,
+  Input,
+  useColorModeValue,
+  createIcon,
+} from "@chakra-ui/react"
 
 const Home = () => {
   const TEST_GIFS = [
@@ -69,35 +80,42 @@ const Home = () => {
     <Button onClick={connectWallet}>Connect to Wallet</Button>
   )
 
- const renderConnectedContainer = () => (
-   <div className="connected-container">
-     <form
-       onSubmit={(event) => {
-         event.preventDefault()
-         sendGif()
-       }}
-     >
-       <input
-         type="text"
-         placeholder="Enter gif link!"
-         value={inputValue}
-         onChange={onInputChange}
-       />
-       <button type="submit" className="cta-button submit-gif-button">
-         Submit
-       </button>
-     </form>
-     <div className="gif-grid">
-       {/* Map through gifList instead of TEST_GIFS */}
-       {gifList.map((gif) => (
-         <div className="gif-item" key={gif}>
-           <img src={gif} alt={gif} />
-         </div>
-       ))}
-     </div>
-   </div>
- )
-
+  const renderConnectedContainer = () => (
+    <Container>
+      <Stack
+        direction={"column"}
+        spacing={3}
+        align={"center"}
+        alignSelf={"center"}
+        position={"relative"}
+      >
+        <form
+          onSubmit={(event) => {
+            event.preventDefault()
+            sendGif()
+          }}
+        >
+          <Input
+            type="text"
+            placeholder="Enter gif link!"
+            value={inputValue}
+            onChange={onInputChange}
+          />
+          <Button type="submit">
+            Submit
+          </Button>
+        </form>
+        <div className="gif-grid">
+          {/* Map through gifList instead of TEST_GIFS */}
+          {gifList.map((gif) => (
+            <div className="gif-item" key={gif}>
+              <img src={gif} alt={gif} />
+            </div>
+          ))}
+        </div>
+      </Stack>
+    </Container>
+  )
 
   useEffect(() => {
     const onLoad = async () => {
@@ -119,40 +137,37 @@ const Home = () => {
   }, [walletAddress])
 
   return (
-    <ChakraProvider>
-      <Container centerContent>
-        <Center>
-          <Head>
-            <title>Delphis</title>
-            <link rel="icon" href="/favicon.ico" />
-          </Head>
+    <>
+      <Head>
+        <title>Delphis</title>
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <Container maxW={"3xl"}>
+        <Stack
+          as={Box}
+          textAlign={"center"}
+          spacing={{ base: 8, md: 14 }}
+          py={{ base: 20, md: 36 }}
+        ></Stack>
 
-          <main>
-            <h1 className="title">
-              Welcome to <a href="/">Delphis</a>
-            </h1>
-
-            <p className="description">
-              Get started by connecting your Solana Wallet!
-            </p>
-            {!walletAddress && renderNotConnectedContainer()}
-            {walletAddress && renderConnectedContainer()}
-          </main>
-
-        </Center>
+        <Stack
+          direction={"column"}
+          spacing={3}
+          align={"center"}
+          alignSelf={"center"}
+          position={"relative"}
+        >
+          <Heading className="title">
+            Welcome to <a href="/">Delphis</a>
+          </Heading>
+          <Text className="description">
+            Get started by connecting your Solana Wallet!
+          </Text>
+          {!walletAddress && renderNotConnectedContainer()}
+          {walletAddress && renderConnectedContainer()}
+        </Stack>
       </Container>
-      <Container centerContent>
-        <footer>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Powered by <img src="/vercel.svg" alt="Vercel" className="logo" />
-          </a>
-        </footer>
-      </Container>
-    </ChakraProvider>
+    </>
   )
 }
 

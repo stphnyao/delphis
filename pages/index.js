@@ -9,6 +9,8 @@ import {
   Text,
   Button,
   Stack,
+  Input,
+  Textarea
 } from "@chakra-ui/react"
 
 import idl from "../idl.json"
@@ -17,26 +19,26 @@ import { Program, Provider, web3 } from "@project-serum/anchor"
 
 import kp from "../src/keypair.json"
 // SystemProgram is a reference to the Solana runtime!
-const { SystemProgram, Keypair } = web3;
+const { SystemProgram, Keypair } = web3
 
-// Create a keypair for the account that will hold the GIF data.
+// Create a keypair for the account that will hold the delphis diary notes data.
 const arr = Object.values(kp._keypair.secretKey)
 const secret = new Uint8Array(arr)
 const baseAccount = web3.Keypair.fromSecretKey(secret)
 
 // Get our program's id from the IDL file.
-const programID = new PublicKey(idl.metadata.address);
+const programID = new PublicKey(idl.metadata.address)
 
 // Set our network to devnet.
-const network = clusterApiUrl('devnet');
+const network = clusterApiUrl("devnet")
 
 // Controls how we want to acknowledge when a transaction is "done".
 const opts = {
-  preflightCommitment: "processed"
+  preflightCommitment: "processed",
 }
 
 const Home = () => {
-  const getGifList = async () => {
+  const getDiaryNotes = async () => {
     try {
       const provider = getProvider()
       const program = new Program(idl, programID, provider)
@@ -45,16 +47,16 @@ const Home = () => {
       )
 
       console.log("Got the account", account)
-      setGifList(account.gifList)
+      setDiaryNotes(account.diaryNotes)
     } catch (error) {
-      console.log("Error in getGifList: ", error)
-      setGifList(null)
+      console.log("Error in getting diary notes: ", error)
+      setDiaryNotes(null)
     }
   }
 
   const [walletAddress, setWalletAddress] = useState(null)
   const [inputValue, setInputValue] = useState("")
-  const [gifList, setGifList] = useState([])
+  const [diaryNotes, setDiaryNotes] = useState([])
   const checkIfWalletIsConnected = async () => {
     try {
       const { solana } = window
@@ -91,28 +93,28 @@ const Home = () => {
     }
   }
 
-  const sendGif = async () => {
+  const createDiaryNote = async () => {
     if (inputValue.length === 0) {
-      console.log("No gif link given!")
+      console.log("No diary note created!")
       return
     }
     setInputValue("")
-    console.log("Gif link:", inputValue)
+    console.log("Diary note:", inputValue)
     try {
       const provider = getProvider()
       const program = new Program(idl, programID, provider)
 
-      await program.rpc.addGif(inputValue, {
+      await program.rpc.startDelphisDiary(inputValue, {
         accounts: {
           baseAccount: baseAccount.publicKey,
           user: provider.wallet.publicKey,
         },
       })
-      console.log("GIF successfully sent to program", inputValue)
+      console.log("Diary note successfully added to the blockchain!", inputValue)
 
-      await getGifList()
+      await getDiaryNotes()
     } catch (error) {
-      console.log("Error sending GIF:", error)
+      console.log("Error creating diary note:", error)
     }
   }
 
@@ -131,12 +133,12 @@ const Home = () => {
     return provider
   }
 
-  const createGifAccount = async () => {
+  const createDelphisDiaryAccount = async () => {
     try {
       const provider = getProvider()
       const program = new Program(idl, programID, provider)
       console.log("ping")
-      await program.rpc.startStuffOff({
+      await program.rpc.startDelphisDiary({
         accounts: {
           baseAccount: baseAccount.publicKey,
           user: provider.wallet.publicKey,
@@ -145,10 +147,10 @@ const Home = () => {
         signers: [baseAccount],
       })
       console.log(
-        "Created a new BaseAccount w/ address:",
+        "Created a new Delphis Diary Account w/ address:",
         baseAccount.publicKey.toString()
       )
-      await getGifList()
+      await getDiaryNotes()
     } catch (error) {
       console.log("Error creating BaseAccount account:", error)
     }
@@ -160,47 +162,51 @@ const Home = () => {
 
   const renderConnectedContainer = () => {
     // If we hit this, it means the program account hasn't been initialized.
-    if (gifList === null) {
+    if (diaryNotes === null) {
       return (
-        <div className="connected-container">
-          <button
-            className="cta-button submit-gif-button"
-            onClick={createGifAccount}
-          >
-            Do One-Time Initialization For GIF Program Account
-          </button>
-        </div>
+        <Container>
+          <Button onClick={createDelphisDiaryAccount}>
+            Do One-Time Initialization For Delphis Account
+          </Button>
+        </Container>
       )
     }
-    // Otherwise, we're good! Account exists. User can submit GIFs.
+    // Otherwise, we're good! Account exists. User can submit diary notes.
     else {
       return (
-        <div className="connected-container">
-          <form
-            onSubmit={(event) => {
-              event.preventDefault()
-              sendGif()
-            }}
-          >
-            <input
-              type="text"
-              placeholder="Enter gif link!"
-              value={inputValue}
-              onChange={onInputChange}
-            />
-            <button type="submit" className="cta-button submit-gif-button">
-              Submit
-            </button>
-          </form>
-          <div className="gif-grid">
-            {/* We use index as the key instead, also, the src is now item.gifLink */}
-            {gifList.map((item, index) => (
-              <div className="gif-item" key={index}>
-                <img src={item.gifLink} />
-              </div>
+        <Center>
+          <Container>
+            <form
+              onSubmit={(event) => {
+                event.preventDefault()
+                createDiaryNote()
+              }}
+            >
+              <Center>
+                <Textarea
+                  width="lg"
+                  type="lg"
+                  placeholder="Write a Delphis Diary Note.."
+                  value={inputValue}
+                  onChange={onInputChange}
+                />
+              </Center>
+
+              <Center>
+                <Button mt={4} type="submit">
+                  Submit
+                </Button>
+              </Center>
+            </form>
+
+            {/* We use index as the key instead, also, the src is now item.diaryNote */}
+            {diaryNotes.map((item, index) => (
+              <Box key={index}>
+                <img src={item.diaryNote} />
+              </Box>
             ))}
-          </div>
-        </div>
+          </Container>
+        </Center>
       )
     }
   }
@@ -215,8 +221,8 @@ const Home = () => {
 
   useEffect(() => {
     if (walletAddress) {
-      console.log("Fetching GIF list...")
-      getGifList()
+      console.log("Fetching your diary notes...")
+      getDiaryNotes()
     }
   }, [walletAddress])
 
@@ -241,10 +247,10 @@ const Home = () => {
           alignSelf={"center"}
           position={"relative"}
         >
-          <Heading className="title">
+          <Heading fontWeight="extrabold" letterSpacing="tight">
             Welcome to <a href="/">Delphis</a>
           </Heading>
-          <Text className="description">
+          <Text mt="4" fontSize="lg">
             Get started by connecting your Solana Wallet!
           </Text>
           {!walletAddress && renderNotConnectedContainer()}

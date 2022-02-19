@@ -1,9 +1,9 @@
 {
   "version": "0.1.0",
-  "name": "delphistest",
+  "name": "delphisdiary",
   "instructions": [
     {
-      "name": "startStuffOff",
+      "name": "startDelphisDiary",
       "accounts": [
         {
           "name": "baseAccount",
@@ -24,7 +24,7 @@
       "args": []
     },
     {
-      "name": "addGif",
+      "name": "addDiaryNote",
       "accounts": [
         {
           "name": "baseAccount",
@@ -39,7 +39,7 @@
       ],
       "args": [
         {
-          "name": "gifLink",
+          "name": "diaryNote",
           "type": "string"
         }
       ]
@@ -52,11 +52,11 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "totalGifs",
+            "name": "totalDiaryNotes",
             "type": "u64"
           },
           {
-            "name": "gifList",
+            "name": "diaryNotes",
             "type": {
               "vec": {
                 "defined": "ItemStruct"
@@ -74,7 +74,7 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "gifLink",
+            "name": "diaryNote",
             "type": "string"
           },
           {
@@ -86,6 +86,6 @@
     }
   ],
   "metadata": {
-    "address": "71oPJGp3NDcuKtPEAurTeLQg8cyWbQN86VYpT6AFMDW5"
+    "address": "HJQqktvhouZW3iEHA5v8HLg49rLD5N7sgExQLpiCZV7V"
   }
 }

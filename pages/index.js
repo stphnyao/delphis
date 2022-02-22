@@ -10,7 +10,7 @@ import {
   Button,
   Stack,
   Input,
-  Textarea
+  Textarea,
 } from "@chakra-ui/react"
 
 import idl from "../idl.json"
@@ -93,7 +93,7 @@ const Home = () => {
     }
   }
 
-  const createDiaryNote = async () => {
+  const addDiaryNote = async () => {
     if (inputValue.length === 0) {
       console.log("No diary note created!")
       return
@@ -104,13 +104,16 @@ const Home = () => {
       const provider = getProvider()
       const program = new Program(idl, programID, provider)
 
-      await program.rpc.startDelphisDiary(inputValue, {
+      await program.rpc.addDiaryNote(inputValue, {
         accounts: {
           baseAccount: baseAccount.publicKey,
           user: provider.wallet.publicKey,
         },
       })
-      console.log("Diary note successfully added to the blockchain!", inputValue)
+      console.log(
+        "Diary note successfully added to the blockchain!",
+        inputValue
+      )
 
       await getDiaryNotes()
     } catch (error) {
@@ -178,7 +181,9 @@ const Home = () => {
           <Container>
             <form
               onSubmit={(event) => {
-                event.createDiaryNote()
+                event.preventDefault();
+                addDiaryNote();
+                
               }}
             >
               <Center>

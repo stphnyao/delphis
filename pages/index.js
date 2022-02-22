@@ -178,8 +178,7 @@ const Home = () => {
           <Container>
             <form
               onSubmit={(event) => {
-                event.preventDefault()
-                createDiaryNote()
+                event.createDiaryNote()
               }}
             >
               <Center>

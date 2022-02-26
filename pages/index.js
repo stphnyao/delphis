@@ -150,12 +150,12 @@ const Home = () => {
         signers: [baseAccount],
       })
       console.log(
-        "Created a new Delphis Diary Account w/ address:",
+        "Created a new Delphis Account w/ address:",
         baseAccount.publicKey.toString()
       )
       await getDiaryNotes()
     } catch (error) {
-      console.log("Error creating BaseAccount account:", error)
+      console.log("Error creating Delphis account:", error)
     }
   }
 
@@ -181,9 +181,8 @@ const Home = () => {
           <Container>
             <form
               onSubmit={(event) => {
-                event.preventDefault();
-                addDiaryNote();
-                
+                event.preventDefault()
+                addDiaryNote()
               }}
             >
               <Center>
@@ -206,7 +205,7 @@ const Home = () => {
             {/* We use index as the key instead, also, the src is now item.diaryNote */}
             {diaryNotes.map((item, index) => (
               <Box key={index}>
-                <img src={item.diaryNote} />
+                <Text>{item.diaryNote}</Text>
               </Box>
             ))}
           </Container>
